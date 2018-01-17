@@ -87,6 +87,29 @@ app.get('/api/posts',function(req,res){
 	})()
 })
 
+app.get('/api/post/:id',function(req,res){
+		(async function() {
+		try {
+			var database = await MongoClient.connect(url);
+			const db = database.db('insta')
+			
+			var insta_posts = db.collection("insta_posts");
+
+			var name = req.query.name;
+			var description = req.query.description;
+
+			var data = await insta_posts.find().toArray();
+
+			res.end(JSON.stringify(data));	
+
+			database.close();
+			
+		} catch(e) {
+			console.log(e);
+		}
+	})()
+})
+
 app.post('/add_post', upload.single('picture'), function (req, res, next){
 
 	(async function() {
@@ -105,7 +128,7 @@ app.post('/add_post', upload.single('picture'), function (req, res, next){
 
 			await fs.rename(req.file.path, 'public/uploads/'+req.file.originalname)
 
-			res.redirect('/');
+			res.redirect('/panel');
 		
 		} catch(e) {
 			console.log(e);
@@ -115,30 +138,6 @@ app.post('/add_post', upload.single('picture'), function (req, res, next){
 	})()
 })
 
-
-app.get('/pictures',function(req,res){
-	fs.readdir('./public/uploads', (err, files) => {
-
-	  if (!err){
-	  	res.render('pictures.pug',{files:files});	  	
-	  } else {
-	  	console.log('error '+err);
-	  	res.end('We got some error!');
-	  }
-	})
-})
-
-app.get('/api/pictures',function(req,res){
-	fs.readdir('./public/uploads', (err, files) => {
-
-	  if (!err){
-	  	res.end(JSON.stringify(files));
-	  } else {
-	  	console.log('error '+err);
-	  	res.end('We got some error!');
-	  }
-	})
-})
 
 var server = app.listen(8080,function(){
 
